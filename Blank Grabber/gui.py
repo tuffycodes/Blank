@@ -2022,3 +2022,16 @@ if __name__ == "__main__":
         app.mainloop()
     else:
         messagebox.showerror(APPLICATION_NAME, "Only Windows operating system is supported.")
+except Exception as e:
+        import traceback
+        error_message = f"Error: {str(e)}\n\n{traceback.format_exc()}"
+        print(error_message)
+        # Make the error visible in a message box
+        try:
+            import tkinter.messagebox as msgbox
+            msgbox.showerror("Error", error_message)
+        except:
+            # If tkinter fails, try with ctypes
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(0, error_message, "Error", 0)
+        input("Press Enter to exit...")
