@@ -713,7 +713,7 @@ class BuilderOptionsFrame(ctk.CTkFrame):
         )
         self.captureHistoryCheckboxControl.pack(anchor="w", pady=5)
         
-                self.captureAutofillsCheckboxControl = ctk.CTkSwitch(
+        self.captureAutofillsCheckboxControl = ctk.CTkSwitch(
             browser_right,
             text="Autofills",
             variable=self.captureAutofillsVar,
