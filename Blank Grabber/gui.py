@@ -1428,20 +1428,20 @@ class BuilderOptionsFrame(ctk.CTkFrame):
                     messagebox.showwarning(APPLICATION_NAME, "Unable to connect to the internet!")
                     return
                 
-                try:
-                    from urllib.request import Request, urlopen
-                    from urllib.error import URLError
-                    import json
-                    
-                    # Test bot token validity
-                    req = Request(f"https://api.telegram.org/bot{token}/getMe", method="GET")
-                    req.add_header("User-Agent", "Mozilla/5.0")
-                    
-                    with urlopen(req) as response:
-                                                result = json.loads(response.read().decode())
-                        if not result.get("ok"):
-                            messagebox.showerror(APPLICATION_NAME, "Invalid bot token!")
-                            return
+               try:
+    from urllib.request import Request, urlopen
+    from urllib.error import URLError
+    import json
+    
+    # Test bot token validity
+    req = Request(f"https://api.telegram.org/bot{token}/getMe", method="GET")
+    req.add_header("User-Agent", "Mozilla/5.0")
+    
+    with urlopen(req) as response:
+        result = json.loads(response.read().decode())
+        if not result.get("ok"):
+            messagebox.showerror(APPLICATION_NAME, "Invalid bot token!")
+            return
                     
                     # Test sending a message
                     test_message = urllib.parse.quote("Your endpoint is working!")
